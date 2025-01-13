@@ -3,13 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Barcode Scanner</title>
+    <title>Web Barcode Scanner</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <script>
+      // Fungsi untuk memulai kamera
+      function startScanning() {
+        fetch("/start", { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            alert(data.status);
+            document.getElementById("camera-container").style.display = "block";
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Fungsi untuk menghentikan kamera
+      function stopScanning() {
+        fetch("/stop", { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            alert(data.status);
+            document.getElementById("camera-container").style.display = "none";
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Fungsi untuk memperbarui barcode yang terdeteksi
+      function updateBarcode() {
+        fetch("/get_barcode")
+          .then((response) => response.json())
+          .then((data) => {
+            const barcodeElement = document.getElementById("barcode");
+            barcodeElement.textContent =
+              data.barcode || "No barcode detected yet.";
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Refresh barcode setiap 1 detik
+      setInterval(updateBarcode, 1000);
+    </script>
   </head>
   <body>
-    <h1>Barcode Scanner</h1>
-    <form action="/scan" method="post">
-      <button type="submit">Start Scanning</button>
-    </form>
+    <h1>Web Barcode Scanner</h1>
+    <div id="buttons-container">
+      <button onclick="startScanning()">Start Scanning</button>
+      <button onclick="stopScanning()">Stop Scanning</button>
+    </div>
+    <div id="camera-container" style="display: none">
+      <img src="/video_feed" alt="Camera Feed" id="camera-feed" />
+    </div>
+    <p>Current Barcode: <span id="barcode">No barcode detected yet.</span></p>
     <a href="/download">Download CSV</a>
   </body>
 </html>
